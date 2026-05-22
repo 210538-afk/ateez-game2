@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ATEEZ - NASA Mobile Challenge</title>
+    <style>
+        :root { --ateez-gold: #c3a34a; --ateez-black: #0f0f0f; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--ateez-black); color: white; font-family: sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; width: 100vw; overflow: hidden; }
+        
+        /* 進入遊戲的引導大按鈕，確保手機瀏覽器放行聲音 */
+        #start-overlay { position: absolute; top:0; left:0; width:100vw; height:100vh; background: rgba(15,15,15,0.95); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #start-btn { background: var(--ateez-gold); color: black; font-size: 20px; font-weight: bold; padding: 20px 40px; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 0 20px rgba(195,163,74,0.5); }
+
+        /* 歌詞在上面 (佔 45% 高度) */
+        #lyrics-column { height: 45%; width: 100%; background: linear-gradient(180deg, #121212 0%, #1e1e1e 100%); border-bottom: 2px solid #333; position: relative; }
+        #lyrics-container { height: 100%; overflow-y: auto; padding: 120px 20px; scroll-behavior: smooth; text-align: center; }
+        #lyrics-container::-webkit-scrollbar { display: none; }
+        .lyric-line { font-size: 16px; margin: 20px 0; opacity: 0.2; transition: all 0.4s ease; line-height: 1.4; }
+        .lyric-line.active { opacity: 1; color: var(--ateez-gold); font-size: 20px; font-weight: bold; }
+
+        /* 選項在下面 (佔 55% 高度) */
+        #quiz-column { height: 55%; width: 100%; background-color: #050505; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 15px; }
+        #score-board { font-size: 36px; color: var(--ateez-gold); margin: 0; font-weight: 800; }
+        .status-msg { height: 20px; font-size: 15px; font-weight: bold; }
+        
+        /* 2x4 手機舒適按鈕網格 */
+        .members-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; flex: 1; margin: 10px 0; }
+        .member-btn { background: #1a1a20; border: 1px solid #333; color: #eee; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; text-transform: uppercase; }
+        .member-btn:active { background: #333; transform: scale(0.95); }
+        .correct { background: #2e7d32 !important; border-color: #4caf50 !important; }
+        .wrong { background: #c62828 !important; border-color: #f44336 !important; }
+
+        .control-panel { width: 100%; text-align: center; }
+        audio { width: 100%; height: 40px; filter: invert(1); }
+        .tip { font-size: 11px; color: #555; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div id="start-overlay">
+    <button id="start-btn" onclick="initGame()">點擊開始 ATINY 挑戰 🎵</button>
+    <p style="color: #666; font-size: 13px; margin-top: 15px;">(點擊將自動加載並播放音樂)</p>
+</div>
+
+<div id="lyrics-column">
+    <div id="lyrics-container">
+        <div class="lyric-line" data-time="0" data-singer="Seonghwa">내려놔 장비는 툭<br>왔잖아 Eyes on me, look</div>
+        <div class="lyric-line" data-time="5.5" data-singer="Seonghwa">고르지 오늘의 Loop<br>보여줘 Call me Houdini</div>
+        <div class="lyric-line" data-time="11" data-singer="Seonghwa">홀려버리지 난 Mind</div>
+        <div class="lyric-line" data-time="15" data-singer="Yunho">I ain’t never stop<br>Sweep it all up 막 쓸어 담아 cost, go</div>
+        <div class="lyric-line" data-time="20" data-singer="Yunho">미치게 Whoa 알잖아 계속 찍어내 막 barcode</div>
+        <div class="lyric-line" data-time="25.5" data-singer="San">챙겨놔 Bring my things<br>안 받아 Hotline bling</div>
+        <div class="lyric-line" data-time="30.5" data-singer="San">죽여 All ‘em hits<br>묶어 All ‘em bands imma</div>
+        <div class="lyric-line" data-time="36" data-singer="Yeosang">808’s so deep<br>They gon’ fracture ribs</div>
+        <div class="lyric-line" data-time="41" data-singer="Yeosang">그 위에 얹어 Meat<br>요리해 Special meal</div>
+        <div class="lyric-line" data-time="46" data-singer="San">뱉어 난 Gold & Silver<br>만들어 Masterpiece</div>
+        <div class="lyric-line" data-time="51" data-singer="San">가치는 안 변하지<br>It’s till I rest in peace</div>
+        <div class="lyric-line" data-time="56.5" data-singer="Wooyoung">Turn up<br>I fly, so higher than the sky</div>
+        <div class="lyric-line" data-time="61.5" data-singer="Wooyoung">We go, 저 우주까지 올라 going up</div>
+        <div class="lyric-line" data-time="67" data-singer="San">Shoot for the stars like NASA<br>Always going up like my stack</div>
+        <div class="lyric-line" data-time="72" data-singer="San">Ready on your mark, go fasta<br>Shoot for the stars like NASA</div>
+        <div class="lyric-line" data-time="77.5" data-singer="Yeosang">Eyes on the ball, no pasta<br>Rooting for my fall, yeah I catch that</div>
+        <div class="lyric-line" data-time="83" data-singer="Yeosang">Dough going up like a half stack</div>
+        <div class="lyric-line" data-time="88.5" data-singer="Jongho">올라가 저 멀리 Hell yeah<br>정하지 않아 No limits yeah</div>
+        <div class="lyric-line" data-time="94" data-singer="Yunho">오로지 향해 하늘로</div>
+        <div class="lyric-line" data-time="99" data-singer="Seonghwa">Chorus: Shoot for the stars like NASA</div>
+        <div class="lyric-line" data-time="110" data-singer="Hongjoong">Irony하지 별이 됐어도 Rocket을 쏘니</div>
+        <div class="lyric-line" data-time="116" data-singer="Hongjoong">다 머리 조심 우린 함부로 막 Fire spitting</div>
+        <div class="lyric-line" data-time="121" data-singer="Hongjoong">숨겨 날 NASA 우주는 Mi casa<br>세계를 무대로 잠시 놀러 온 외계인 하나</div>
+        <div class="lyric-line" data-time="126" data-singer="Hongjoong">That’s me</div>
+        <div class="lyric-line" data-time="130" data-singer="Mingi">무서워 내 삶이 막 붉어져 Like Apple stock</div>
+        <div class="lyric-line" data-time="136" data-singer="Mingi">오르락내리락, 추락한 개미 떼, w가_의 먹잇감</div>
+        <div class="lyric-line" data-time="141" data-singer="Mingi">별들을 수확해 빼고 더하다 추락시켜 Cold collector</div>
+        <div class="lyric-line" data-time="147" data-singer="Mingi">추락마저 Creator 맞아 내 가치는 different</div>
+    </div>
+</div>
+
+<div id="quiz-column">
+    <div id="score-board">0</div>
+    <div class="status-msg" id="status">ATINY, Ready?</div>
+    
+    <div class="members-grid">
+        <button class="member-btn" onclick="check('Hongjoong', this)">Hongjoong</button>
+        <button class="member-btn" onclick="check('Seonghwa', this)">Seonghwa</button>
+        <button class="member-btn" onclick="check('Yunho', this)">Yunho</button>
+        <button class="member-btn" onclick="check('Yeosang', this)">Yeosang</button>
+        <button class="member-btn" onclick="check('San', this)">San</button>
+        <button class="member-btn" onclick="check('Mingi', this)">Mingi</button>
+        <button class="member-btn" onclick="check('Wooyoung', this)">Wooyoung</button>
+        <button class="member-btn" onclick="check('Jongho', this)">Jongho</button>
+    </div>
+
+    <div class="control-panel">
+        <audio id="player" controls preload="auto"></audio>
+        <div class="tip">點擊歌詞可跳轉重播｜答題時音樂不停</div>
+    </div>
+</div>
+
+<script>
+    const player = document.getElementById('player');
+    const lines = document.querySelectorAll('.lyric-line');
+    const scoreEl = document.getElementById('score-board');
+    const statusEl = document.getElementById('status');
+    let score = 0; let currentAns = ""; let answered = false;
+
+    function initGame() {
+        player.src = "https://files.catbox.moe/3lrap8";
+        player.load();
+        player.play().then(() => {
+            document.getElementById('start-overlay').style.display = 'none';
+        }).catch(err => {
+            document.getElementById('start-overlay').style.display = 'none';
+            statusEl.innerText = "請點擊下方播放鍵開始！";
+        });
+    }
+
+    player.addEventListener('timeupdate', () => {
+        lines.forEach(line => {
+            const time = parseFloat(line.getAttribute('data-time'));
+            if (player.currentTime >= time) {
+                if (!line.classList.contains('active')) {
+                    lines.forEach(l => l.classList.remove('active'));
+                    line.classList.add('active');
+                    line.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    currentAns = line.getAttribute('data-singer');
+                    answered = false;
+                }
+            }
+        });
+    });
+
+    function check(name, btn) {
+        if (player.paused || currentAns === "" || answered) return;
+        if (name === currentAns) {
+            score += 10; btn.classList.add('correct');
+            statusEl.innerText = "RIGHT! +10"; statusEl.style.color = "#4caf50";
+            answered = true;
+        } else {
+            score -= 5; btn.classList.add('wrong');
+            statusEl.innerText = "WRONG! -5"; statusEl.style.color = "#f44336";
+        }
+        scoreEl.innerText = score;
+        setTimeout(() => { btn.classList.remove('correct', 'wrong'); statusEl.innerText = ""; }, 400);
+    }
+
+    lines.forEach(line => {
+        line.addEventListener('click', () => {
+            player.currentTime = parseFloat(line.getAttribute('data-time'));
+            player.play();
+        });
+    });
+</script>
+</body>
+</html>
