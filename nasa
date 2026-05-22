@@ -6,43 +6,65 @@
     <title>ATEEZ - NASA Mobile Challenge</title>
     <style>
         :root { --ateez-gold: #c3a34a; --ateez-black: #0f0f0f; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--ateez-black); color: white; font-family: sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; width: 100vw; overflow: hidden; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
         
-        /* 進入遊戲的引導大按鈕，確保手機瀏覽器放行聲音 */
-        #start-overlay { position: absolute; top:0; left:0; width:100vw; height:100vh; background: rgba(15,15,15,0.95); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #start-btn { background: var(--ateez-gold); color: black; font-size: 20px; font-weight: bold; padding: 20px 40px; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 0 20px rgba(195,163,74,0.5); }
+        body { 
+            background-color: var(--ateez-black); 
+            color: white; 
+            font-family: sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            width: 100vw; 
+            overflow: hidden; 
+        }
 
-        /* 歌詞在上面 (佔 45% 高度) */
-        #lyrics-column { height: 45%; width: 100%; background: linear-gradient(180deg, #121212 0%, #1e1e1e 100%); border-bottom: 2px solid #333; position: relative; }
-        #lyrics-container { height: 100%; overflow-y: auto; padding: 120px 20px; scroll-behavior: smooth; text-align: center; }
+        /* 歌詞在上面 (佔 40% 高度) */
+        #lyrics-column { 
+            height: 40%; 
+            width: 100%; 
+            background: linear-gradient(180deg, #121212 0%, #1e1e1e 100%); 
+            border-bottom: 2px solid #333; 
+            position: relative; 
+        }
+        #lyrics-container { 
+            height: 100%; 
+            overflow-y: auto; 
+            padding: 80px 20px; 
+            scroll-behavior: smooth; 
+            text-align: center; 
+        }
         #lyrics-container::-webkit-scrollbar { display: none; }
         .lyric-line { font-size: 16px; margin: 20px 0; opacity: 0.2; transition: all 0.4s ease; line-height: 1.4; }
         .lyric-line.active { opacity: 1; color: var(--ateez-gold); font-size: 20px; font-weight: bold; }
 
-        /* 選項在下面 (佔 55% 高度) */
-        #quiz-column { height: 55%; width: 100%; background-color: #050505; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 15px; }
-        #score-board { font-size: 36px; color: var(--ateez-gold); margin: 0; font-weight: 800; }
-        .status-msg { height: 20px; font-size: 15px; font-weight: bold; }
+        /* 選項在下面 (佔 60% 高度) */
+        #quiz-column { 
+            height: 60%; 
+            width: 100%; 
+            background-color: #050505; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 15px; 
+        }
+        #score-board { font-size: 36px; color: var(--ateez-gold); font-weight: 800; margin-top: 5px; }
+        .status-msg { height: 20px; font-size: 15px; font-weight: bold; color: var(--ateez-gold); }
         
-        /* 2x4 手機舒適按鈕網格 */
+        /* 2x4 手機按鈕網格 */
         .members-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; flex: 1; margin: 10px 0; }
         .member-btn { background: #1a1a20; border: 1px solid #333; color: #eee; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; text-transform: uppercase; }
         .member-btn:active { background: #333; transform: scale(0.95); }
         .correct { background: #2e7d32 !important; border-color: #4caf50 !important; }
         .wrong { background: #c62828 !important; border-color: #f44336 !important; }
 
-        .control-panel { width: 100%; text-align: center; }
+        .control-panel { width: 100%; text-align: center; padding-bottom: 10px; }
         audio { width: 100%; height: 40px; filter: invert(1); }
-        .tip { font-size: 11px; color: #555; margin-top: 5px; }
+        .tip { font-size: 11px; color: #666; margin-top: 5px; }
     </style>
 </head>
 <body>
-
-<div id="start-overlay">
-    <button id="start-btn" onclick="initGame()">點擊開始 ATINY 挑戰 🎵</button>
-    <p style="color: #666; font-size: 13px; margin-top: 15px;">(點擊將自動加載並播放音樂)</p>
-</div>
 
 <div id="lyrics-column">
     <div id="lyrics-container">
@@ -71,7 +93,7 @@
         <div class="lyric-line" data-time="121" data-singer="Hongjoong">숨겨 날 NASA 우주는 Mi casa<br>세계를 무대로 잠시 놀러 온 외계인 하나</div>
         <div class="lyric-line" data-time="126" data-singer="Hongjoong">That’s me</div>
         <div class="lyric-line" data-time="130" data-singer="Mingi">무서워 내 삶이 막 붉어져 Like Apple stock</div>
-        <div class="lyric-line" data-time="136" data-singer="Mingi">오르락내리락, 추락한 개미 떼, w가_의 먹잇감</div>
+        <div class="lyric-line" data-time="136" data-singer="Mingi">오르락내리락, 추락한 개미 떼, 월가의 먹잇감</div>
         <div class="lyric-line" data-time="141" data-singer="Mingi">별들을 수확해 빼고 더하다 추락시켜 Cold collector</div>
         <div class="lyric-line" data-time="147" data-singer="Mingi">추락마저 Creator 맞아 내 가치는 different</div>
     </div>
@@ -79,7 +101,7 @@
 
 <div id="quiz-column">
     <div id="score-board">0</div>
-    <div class="status-msg" id="status">ATINY, Ready?</div>
+    <div class="status-msg" id="status">點擊下方播放鍵開始！</div>
     
     <div class="members-grid">
         <button class="member-btn" onclick="check('Hongjoong', this)">Hongjoong</button>
@@ -93,8 +115,8 @@
     </div>
 
     <div class="control-panel">
-        <audio id="player" controls preload="auto"></audio>
-        <div class="tip">點擊歌詞可跳轉重播｜答題時音樂不停</div>
+        <audio id="player" controls preload="auto" src="https://files.catbox.moe/3lrap8"></audio>
+        <div class="tip">提示：手動按播放鍵 ｜ 點擊歌詞可重播</div>
     </div>
 </div>
 
@@ -105,17 +127,7 @@
     const statusEl = document.getElementById('status');
     let score = 0; let currentAns = ""; let answered = false;
 
-    function initGame() {
-        player.src = "https://files.catbox.moe/3lrap8";
-        player.load();
-        player.play().then(() => {
-            document.getElementById('start-overlay').style.display = 'none';
-        }).catch(err => {
-            document.getElementById('start-overlay').style.display = 'none';
-            statusEl.innerText = "請點擊下方播放鍵開始！";
-        });
-    }
-
+    // 監聽時間更新歌詞
     player.addEventListener('timeupdate', () => {
         lines.forEach(line => {
             const time = parseFloat(line.getAttribute('data-time'));
@@ -126,11 +138,13 @@
                     line.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     currentAns = line.getAttribute('data-singer');
                     answered = false;
+                    statusEl.innerText = "這句是誰唱的？";
                 }
             }
         });
     });
 
+    // 檢查答案
     function check(name, btn) {
         if (player.paused || currentAns === "" || answered) return;
         if (name === currentAns) {
@@ -142,9 +156,10 @@
             statusEl.innerText = "WRONG! -5"; statusEl.style.color = "#f44336";
         }
         scoreEl.innerText = score;
-        setTimeout(() => { btn.classList.remove('correct', 'wrong'); statusEl.innerText = ""; }, 400);
+        setTimeout(() => { btn.classList.remove('correct', 'wrong'); }, 400);
     }
 
+    // 點歌詞跳時間
     lines.forEach(line => {
         line.addEventListener('click', () => {
             player.currentTime = parseFloat(line.getAttribute('data-time'));
